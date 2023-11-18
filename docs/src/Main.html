@@ -1,0 +1,82 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Main</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-2"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">System.Environment</span></span><span>
+</span><span id="line-3"></span><span>
+</span><span id="line-4"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Database.SQLite.Simple</span></span><span>
+</span><span id="line-5"></span><span>
+</span><span id="line-6"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Database.html"><span class="hs-identifier">Database</span></a></span><span>
+</span><span id="line-7"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Fetch.html"><span class="hs-identifier">Fetch</span></a></span><span>
+</span><span id="line-8"></span><span>
+</span><span id="line-9"></span><span class="hs-comment">-- |The main function provides five different functionalities:</span><span>
+</span><span id="line-10"></span><span class="hs-comment">--</span><span>
+</span><span id="line-11"></span><span class="hs-comment">--  [@create@] will create the database urls.db</span><span>
+</span><span id="line-12"></span><span class="hs-comment">--</span><span>
+</span><span id="line-13"></span><span class="hs-comment">--  [@saved@] simply prints all the urls currently stored on the database</span><span>
+</span><span id="line-14"></span><span class="hs-comment">--</span><span>
+</span><span id="line-15"></span><span class="hs-comment">--  [@unfold@] will download and parse all pages on the database, storing all found links</span><span>
+</span><span id="line-16"></span><span class="hs-comment">--</span><span>
+</span><span id="line-17"></span><span class="hs-comment">--  [@show url@] will download and display the contents of the given url</span><span>
+</span><span id="line-18"></span><span class="hs-comment">--</span><span>
+</span><span id="line-19"></span><span class="hs-comment">--  [@crawl url@] will download a given page, parse the links and store on the database  </span><span>
+</span><span id="line-20"></span><span id="main"><span class="annot"><span class="annottext">main :: IO ()
+</span><a href="Main.html#main"><span class="hs-identifier hs-var hs-var">main</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span> </span><span>
+</span><span id="line-21"></span><span>    </span><span id="local-6989586621679097841"><span class="annot"><span class="annottext">Connection
+</span><a href="#local-6989586621679097841"><span class="hs-identifier hs-var">conn</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">IO Connection
+</span><a href="Database.html#dbConnection"><span class="hs-identifier hs-var">dbConnection</span></a></span><span>
+</span><span id="line-22"></span><span>    </span><span id="local-6989586621679097839"><span class="annot"><span class="annottext">[String]
+</span><a href="#local-6989586621679097839"><span class="hs-identifier hs-var">args</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">IO [String]
+</span><span class="hs-identifier hs-var">getArgs</span></span><span>
+</span><span id="line-23"></span><span>    </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">[String]
+</span><a href="#local-6989586621679097839"><span class="hs-identifier hs-var">args</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><span id="line-24"></span><span>        </span><span class="hs-special">[</span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;saved&quot;</span></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Connection -&gt; IO ()
+</span><a href="Database.html#printURLs"><span class="hs-identifier hs-var">printURLs</span></a></span><span> </span><span class="annot"><span class="annottext">Connection
+</span><a href="#local-6989586621679097841"><span class="hs-identifier hs-var">conn</span></a></span><span>
+</span><span id="line-25"></span><span>        </span><span class="hs-special">[</span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;unfold&quot;</span></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Connection -&gt; IO ()
+</span><a href="Database.html#unfoldDB"><span class="hs-identifier hs-var">unfoldDB</span></a></span><span> </span><span class="annot"><span class="annottext">Connection
+</span><a href="#local-6989586621679097841"><span class="hs-identifier hs-var">conn</span></a></span><span>
+</span><span id="line-26"></span><span>        </span><span class="hs-special">[</span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;show&quot;</span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679097835"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679097835"><span class="hs-identifier hs-var">url</span></a></span></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span> </span><span>
+</span><span id="line-27"></span><span>            </span><span id="local-6989586621679097834"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679097834"><span class="hs-identifier hs-var">urlText</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">String -&gt; IO String
+</span><a href="Fetch.html#downloadURL"><span class="hs-identifier hs-var">downloadURL</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679097835"><span class="hs-identifier hs-var">url</span></a></span><span>
+</span><span id="line-28"></span><span>            </span><span class="annot"><span class="annottext">String -&gt; IO ()
+forall a. Show a =&gt; a -&gt; IO ()
+</span><span class="hs-identifier hs-var">print</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679097834"><span class="hs-identifier hs-var">urlText</span></a></span><span>
+</span><span id="line-29"></span><span>        </span><span class="hs-special">[</span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;crawl&quot;</span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679097832"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679097832"><span class="hs-identifier hs-var">url</span></a></span></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-30"></span><span>            </span><span id="local-6989586621679097831"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679097831"><span class="hs-identifier hs-var">urlText</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">String -&gt; IO String
+</span><a href="Fetch.html#downloadURL"><span class="hs-identifier hs-var">downloadURL</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679097832"><span class="hs-identifier hs-var">url</span></a></span><span>
+</span><span id="line-31"></span><span>            </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679097830"><span class="annot"><span class="annottext">urls :: [String]
+</span><a href="#local-6989586621679097830"><span class="hs-identifier hs-var hs-var">urls</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; [String]
+</span><a href="Fetch.html#getHTMLpages"><span class="hs-identifier hs-var">getHTMLpages</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679097831"><span class="hs-identifier hs-var">urlText</span></a></span><span>
+</span><span id="line-32"></span><span>            </span><span class="annot"><span class="annottext">Connection -&gt; [String] -&gt; IO ()
+</span><a href="Database.html#storeURLs"><span class="hs-identifier hs-var">storeURLs</span></a></span><span> </span><span class="annot"><span class="annottext">Connection
+</span><a href="#local-6989586621679097841"><span class="hs-identifier hs-var">conn</span></a></span><span> </span><span class="annot"><span class="annottext">[String]
+</span><a href="#local-6989586621679097830"><span class="hs-identifier hs-var">urls</span></a></span><span>
+</span><span id="line-33"></span><span>        </span><span class="annot"><span class="annottext">[String]
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">IO ()
+</span><a href="Main.html#syntaxError"><span class="hs-identifier hs-var">syntaxError</span></a></span><span>
+</span><span id="line-34"></span><span>    </span><span class="annot"><span class="annottext">Connection -&gt; IO ()
+</span><span class="hs-identifier hs-var">close</span></span><span> </span><span class="annot"><span class="annottext">Connection
+</span><a href="#local-6989586621679097841"><span class="hs-identifier hs-var">conn</span></a></span><span>
+</span><span id="line-35"></span><span>
+</span><span id="line-36"></span><span id="syntaxError"><span class="annot"><span class="annottext">syntaxError :: IO ()
+</span><a href="Main.html#syntaxError"><span class="hs-identifier hs-var hs-var">syntaxError</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; IO ()
+</span><span class="hs-identifier hs-var">putStrLn</span></span><span> </span><span>
+</span><span id="line-37"></span><span>    </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;Usage: Crawler command [args]\n\
+    \\n\
+    \create           Create database urls.db\n\
+    \show url         Shows contents of given URL\n\
+    \saved            List urls on database\n\
+    \crawl url        Gather urls and store in database\n\
+    \unfold           Crawl each of the saved URLs\n&quot;</span></span><span>
+</span><span id="line-44"></span></pre></body></html>

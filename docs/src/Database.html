@@ -1,0 +1,287 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE OverloadedStrings #-}</span><span>
+</span><span id="line-2"></span><span>
+</span><span id="line-3"></span><span class="hs-comment">-- or, on GHCI:</span><span>
+</span><span id="line-4"></span><span class="hs-comment">-- &gt; :set -XOverloadedStrings</span><span>
+</span><span id="line-5"></span><span>
+</span><span id="line-6"></span><span class="hs-comment">-- |Module containing functions that operate on the database urls.db</span><span>
+</span><span id="line-7"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Database</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-8"></span><span>
+</span><span id="line-9"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Types.html"><span class="hs-identifier">Types</span></a></span><span>
+</span><span id="line-10"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Fetch.html"><span class="hs-identifier">Fetch</span></a></span><span>
+</span><span id="line-11"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Monad</span></span><span>
+</span><span id="line-12"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.List</span></span><span>
+</span><span id="line-13"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Database.SQLite.Simple</span></span><span>
+</span><span id="line-14"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Database.SQLite.Simple.Internal</span></span><span>
+</span><span id="line-15"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Database.SQLite.Simple.FromRow</span></span><span>
+</span><span id="line-16"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Database.SQLite.Simple.ToRow</span></span><span>
+</span><span id="line-17"></span><span>
+</span><span id="line-18"></span><span class="hs-comment">-- See more Database.SQLite.Simple examples at</span><span>
+</span><span id="line-19"></span><span class="hs-comment">-- https://hackage.haskell.org/package/sqlite-simple-0.4.18.0/docs/Database-SQLite-Simple.html</span><span>
+</span><span id="line-20"></span><span>
+</span><span id="line-21"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">FromRow</span></span><span> </span><span class="annot"><a href="Types.html#Entry"><span class="hs-identifier hs-type">Entry</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-22"></span><span>    </span><span id="local-6989586621679097690"><span class="annot"><span class="annottext">fromRow :: RowParser Entry
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">fromRow</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">URL -&gt; Bool -&gt; Entry
+</span><a href="Types.html#Entry"><span class="hs-identifier hs-var">Entry</span></a></span><span> </span><span class="annot"><span class="annottext">(URL -&gt; Bool -&gt; Entry)
+-&gt; RowParser URL -&gt; RowParser (Bool -&gt; Entry)
+forall (f :: * -&gt; *) a b. Functor f =&gt; (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;$&gt;</span></span><span> </span><span class="annot"><span class="annottext">RowParser URL
+forall a. FromField a =&gt; RowParser a
+</span><span class="hs-identifier hs-var">field</span></span><span> </span><span class="annot"><span class="annottext">RowParser (Bool -&gt; Entry) -&gt; RowParser Bool -&gt; RowParser Entry
+forall (f :: * -&gt; *) a b. Applicative f =&gt; f (a -&gt; b) -&gt; f a -&gt; f b
+</span><span class="hs-operator hs-var">&lt;*&gt;</span></span><span> </span><span class="annot"><span class="annottext">RowParser Bool
+forall a. FromField a =&gt; RowParser a
+</span><span class="hs-identifier hs-var">field</span></span><span>
+</span><span id="line-23"></span><span>
+</span><span id="line-24"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">ToRow</span></span><span> </span><span class="annot"><a href="Types.html#Entry"><span class="hs-identifier hs-type">Entry</span></a></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-25"></span><span>    </span><span id="local-6989586621679097681"><span class="annot"><span class="annottext">toRow :: Entry -&gt; [SQLData]
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">toRow</span></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Types.html#Entry"><span class="hs-identifier hs-type">Entry</span></a></span><span> </span><span id="local-6989586621679097679"><span class="annot"><span class="annottext">URL
+</span><a href="#local-6989586621679097679"><span class="hs-identifier hs-var">url_</span></a></span></span><span> </span><span id="local-6989586621679097678"><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621679097678"><span class="hs-identifier hs-var">processed_</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(URL, Bool) -&gt; [SQLData]
+forall a. ToRow a =&gt; a -&gt; [SQLData]
+</span><span class="hs-identifier hs-var">toRow</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">URL
+</span><a href="#local-6989586621679097679"><span class="hs-identifier hs-var">url_</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Bool
+</span><a href="#local-6989586621679097678"><span class="hs-identifier hs-var">processed_</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-26"></span><span>
+</span><span id="line-27"></span><span class="hs-comment">-- |Method to create the database urls.db</span><span>
+</span><span id="line-28"></span><span class="hs-comment">-- It uses connectSqlite3 from Database.HDBC.Sqlite3</span><span>
+</span><span id="line-29"></span><span class="annot"><a href="Database.html#dbConnection"><span class="hs-identifier hs-type">dbConnection</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Connection</span></span><span>
+</span><span id="line-30"></span><span id="dbConnection"><span class="annot"><span class="annottext">dbConnection :: IO Connection
+</span><a href="Database.html#dbConnection"><span class="hs-identifier hs-var hs-var">dbConnection</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-31"></span><span>    </span><span id="local-6989586621679097676"><span class="annot"><span class="annottext">Connection
+</span><a href="#local-6989586621679097676"><span class="hs-identifier hs-var">conn</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">URL -&gt; IO Connection
+</span><span class="hs-identifier hs-var">open</span></span><span> </span><span class="annot"><span class="annottext">URL
+</span><span class="hs-string">&quot;urls.db&quot;</span></span><span>
+</span><span id="line-32"></span><span>    </span><span class="annot"><span class="annottext">Connection -&gt; Query -&gt; IO ()
+</span><span class="hs-identifier hs-var">execute_</span></span><span> </span><span class="annot"><span class="annottext">Connection
+</span><a href="#local-6989586621679097676"><span class="hs-identifier hs-var">conn</span></a></span><span> </span><span class="annot"><span class="annottext">Query
+</span><span class="hs-string">&quot;CREATE TABLE IF NOT EXISTS urls (url TEXT, processed BOOL)&quot;</span></span><span>
+</span><span id="line-33"></span><span>    </span><span class="annot"><span class="annottext">Connection -&gt; IO Connection
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">Connection
+</span><a href="#local-6989586621679097676"><span class="hs-identifier hs-var">conn</span></a></span><span>
+</span><span id="line-34"></span><span>
+</span><span id="line-35"></span><span class="annot"><a href="Database.html#urlNotInDB"><span class="hs-identifier hs-type">urlNotInDB</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Connection</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Fetch.html#URL"><span class="hs-identifier hs-type">URL</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
+</span><span id="line-36"></span><span id="urlNotInDB"><span class="annot"><span class="annottext">urlNotInDB :: Connection -&gt; URL -&gt; IO Bool
+</span><a href="Database.html#urlNotInDB"><span class="hs-identifier hs-var hs-var">urlNotInDB</span></a></span></span><span> </span><span id="local-6989586621679097672"><span class="annot"><span class="annottext">Connection
+</span><a href="#local-6989586621679097672"><span class="hs-identifier hs-var">conn</span></a></span></span><span> </span><span id="local-6989586621679097671"><span class="annot"><span class="annottext">URL
+</span><a href="#local-6989586621679097671"><span class="hs-identifier hs-var">url</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-37"></span><span>    </span><span id="local-6989586621679097670"><span class="annot"><span class="annottext">[Entry]
+</span><a href="#local-6989586621679097670"><span class="hs-identifier hs-var">results</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Connection -&gt; Query -&gt; [NamedParam] -&gt; IO [Entry]
+forall r.
+FromRow r =&gt;
+Connection -&gt; Query -&gt; [NamedParam] -&gt; IO [r]
+</span><span class="hs-identifier hs-var">queryNamed</span></span><span> </span><span class="annot"><span class="annottext">Connection
+</span><a href="#local-6989586621679097672"><span class="hs-identifier hs-var">conn</span></a></span><span> </span><span class="annot"><span class="annottext">Query
+</span><span class="hs-string">&quot;SELECT * FROM urls WHERE url = :url&quot;</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;:url&quot;</span></span><span> </span><span class="annot"><span class="annottext">Text -&gt; URL -&gt; NamedParam
+forall v. ToField v =&gt; Text -&gt; v -&gt; NamedParam
+</span><span class="hs-operator hs-var">:=</span></span><span> </span><span class="annot"><span class="annottext">URL
+</span><a href="#local-6989586621679097671"><span class="hs-identifier hs-var">url</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Types.html#Entry"><span class="hs-identifier hs-type">Entry</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-38"></span><span>    </span><span class="annot"><span class="annottext">Bool -&gt; IO Bool
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[Entry] -&gt; Int
+forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; Int
+</span><span class="hs-identifier hs-var">length</span></span><span> </span><span class="annot"><span class="annottext">[Entry]
+</span><a href="#local-6989586621679097670"><span class="hs-identifier hs-var">results</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">0</span></span><span class="hs-special">)</span><span>
+</span><span id="line-39"></span><span>
+</span><span id="line-40"></span><span class="hs-comment">-- |Method to store a list of urls into the database (table url)</span><span>
+</span><span id="line-41"></span><span class="annot"><a href="Database.html#storeURLs"><span class="hs-identifier hs-type">storeURLs</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Connection</span></span><span> </span><span>
+</span><span id="line-42"></span><span>          </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Fetch.html#URL"><span class="hs-identifier hs-type">URL</span></a></span><span class="hs-special">]</span><span> </span><span class="hs-comment">-- ^ List of URLs to be stored on the database</span><span>
+</span><span id="line-43"></span><span>          </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-44"></span><span id="storeURLs"><span class="annot"><span class="annottext">storeURLs :: Connection -&gt; [URL] -&gt; IO ()
+</span><a href="Database.html#storeURLs"><span class="hs-identifier hs-var hs-var">storeURLs</span></a></span></span><span> </span><span class="annot"><span class="annottext">Connection
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">() -&gt; IO ()
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-45"></span><span class="annot"><a href="Database.html#storeURLs"><span class="hs-identifier hs-var">storeURLs</span></a></span><span> </span><span id="local-6989586621679097665"><span class="annot"><span class="annottext">Connection
+</span><a href="#local-6989586621679097665"><span class="hs-identifier hs-var">conn</span></a></span></span><span> </span><span id="local-6989586621679097664"><span class="annot"><span class="annottext">[URL]
+</span><a href="#local-6989586621679097664"><span class="hs-identifier hs-var">urls</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-46"></span><span>    </span><span class="hs-comment">-- removes duplicates or URLs already in database</span><span>
+</span><span id="line-47"></span><span>    </span><span id="local-6989586621679097663"><span class="annot"><span class="annottext">[URL]
+</span><a href="#local-6989586621679097663"><span class="hs-identifier hs-var">urls'</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">(URL -&gt; IO Bool) -&gt; [URL] -&gt; IO [URL]
+forall (m :: * -&gt; *) a.
+Applicative m =&gt;
+(a -&gt; m Bool) -&gt; [a] -&gt; m [a]
+</span><span class="hs-identifier hs-var">filterM</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Connection -&gt; URL -&gt; IO Bool
+</span><a href="Database.html#urlNotInDB"><span class="hs-identifier hs-var">urlNotInDB</span></a></span><span> </span><span class="annot"><span class="annottext">Connection
+</span><a href="#local-6989586621679097665"><span class="hs-identifier hs-var">conn</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[URL] -&gt; [URL]
+forall a. Eq a =&gt; [a] -&gt; [a]
+</span><span class="hs-identifier hs-var">nub</span></span><span> </span><span class="annot"><span class="annottext">[URL]
+</span><a href="#local-6989586621679097664"><span class="hs-identifier hs-var">urls</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-48"></span><span>    </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679097659"><span class="annot"><span class="annottext">query :: Query
+</span><a href="#local-6989586621679097659"><span class="hs-identifier hs-var hs-var">query</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Query
+</span><span class="hs-string">&quot;INSERT INTO urls (url, processed) VALUES (?, ?)&quot;</span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Query</span></span><span>
+</span><span id="line-49"></span><span>    </span><span class="annot"><span class="annottext">Connection -&gt; Query -&gt; [(URL, Bool)] -&gt; IO ()
+forall q. ToRow q =&gt; Connection -&gt; Query -&gt; [q] -&gt; IO ()
+</span><span class="hs-identifier hs-var">executeMany</span></span><span> </span><span class="annot"><span class="annottext">Connection
+</span><a href="#local-6989586621679097665"><span class="hs-identifier hs-var">conn</span></a></span><span> </span><span class="annot"><span class="annottext">Query
+</span><a href="#local-6989586621679097659"><span class="hs-identifier hs-var">query</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">[URL] -&gt; [Bool] -&gt; [(URL, Bool)]
+forall a b. [a] -&gt; [b] -&gt; [(a, b)]
+</span><span class="hs-identifier hs-var">zip</span></span><span> </span><span class="annot"><span class="annottext">[URL]
+</span><a href="#local-6989586621679097663"><span class="hs-identifier hs-var">urls'</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Bool -&gt; [Bool]
+forall a. a -&gt; [a]
+</span><span class="hs-identifier hs-var">repeat</span></span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">False</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-50"></span><span>
+</span><span id="line-51"></span><span class="hs-comment">-- |Method to display all the URLs on the database. It uses getURLs.</span><span>
+</span><span id="line-52"></span><span class="annot"><a href="Database.html#printURLs"><span class="hs-identifier hs-type">printURLs</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Connection</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-53"></span><span id="printURLs"><span class="annot"><span class="annottext">printURLs :: Connection -&gt; IO ()
+</span><a href="Database.html#printURLs"><span class="hs-identifier hs-var hs-var">printURLs</span></a></span></span><span> </span><span id="local-6989586621679097655"><span class="annot"><span class="annottext">Connection
+</span><a href="#local-6989586621679097655"><span class="hs-identifier hs-var">conn</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-54"></span><span>    </span><span id="local-6989586621679097654"><span class="annot"><span class="annottext">[URL]
+</span><a href="#local-6989586621679097654"><span class="hs-identifier hs-var">urls</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Connection -&gt; IO [URL]
+</span><a href="Database.html#getURLs"><span class="hs-identifier hs-var">getURLs</span></a></span><span> </span><span class="annot"><span class="annottext">Connection
+</span><a href="#local-6989586621679097655"><span class="hs-identifier hs-var">conn</span></a></span><span>
+</span><span id="line-55"></span><span>    </span><span class="hs-keyword">if</span><span> </span><span class="annot"><span class="annottext">[URL] -&gt; Int
+forall (t :: * -&gt; *) a. Foldable t =&gt; t a -&gt; Int
+</span><span class="hs-identifier hs-var">length</span></span><span> </span><span class="annot"><span class="annottext">[URL]
+</span><a href="#local-6989586621679097654"><span class="hs-identifier hs-var">urls</span></a></span><span> </span><span class="annot"><span class="annottext">Int -&gt; Int -&gt; Bool
+forall a. Ord a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">&gt;</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">0</span></span><span> </span><span class="hs-keyword">then</span><span>
+</span><span id="line-56"></span><span>        </span><span class="annot"><span class="annottext">(URL -&gt; IO ()) -&gt; [URL] -&gt; IO ()
+forall (t :: * -&gt; *) (m :: * -&gt; *) a b.
+(Foldable t, Monad m) =&gt;
+(a -&gt; m b) -&gt; t a -&gt; m ()
+</span><span class="hs-identifier hs-var">mapM_</span></span><span> </span><span class="annot"><span class="annottext">URL -&gt; IO ()
+forall a. Show a =&gt; a -&gt; IO ()
+</span><span class="hs-identifier hs-var">print</span></span><span> </span><span class="annot"><span class="annottext">[URL]
+</span><a href="#local-6989586621679097654"><span class="hs-identifier hs-var">urls</span></a></span><span>
+</span><span id="line-57"></span><span>    </span><span class="hs-keyword">else</span><span>
+</span><span id="line-58"></span><span>        </span><span class="annot"><span class="annottext">URL -&gt; IO ()
+forall a. Show a =&gt; a -&gt; IO ()
+</span><span class="hs-identifier hs-var">print</span></span><span> </span><span class="annot"><span class="annottext">URL
+</span><span class="hs-string">&quot;No URLS on database yet&quot;</span></span><span>
+</span><span id="line-59"></span><span>
+</span><span id="line-60"></span><span class="hs-comment">-- |Method to retrieve all the URLs on the database.</span><span>
+</span><span id="line-61"></span><span class="annot"><a href="Database.html#getURLs"><span class="hs-identifier hs-type">getURLs</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Connection</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Fetch.html#URL"><span class="hs-identifier hs-type">URL</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-62"></span><span id="getURLs"><span class="annot"><span class="annottext">getURLs :: Connection -&gt; IO [URL]
+</span><a href="Database.html#getURLs"><span class="hs-identifier hs-var hs-var">getURLs</span></a></span></span><span> </span><span id="local-6989586621679097650"><span class="annot"><span class="annottext">Connection
+</span><a href="#local-6989586621679097650"><span class="hs-identifier hs-var">conn</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-63"></span><span>    </span><span id="local-6989586621679097649"><span class="annot"><span class="annottext">[Entry]
+</span><a href="#local-6989586621679097649"><span class="hs-identifier hs-var">results</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Connection -&gt; Query -&gt; IO [Entry]
+forall r. FromRow r =&gt; Connection -&gt; Query -&gt; IO [r]
+</span><span class="hs-identifier hs-var">query_</span></span><span> </span><span class="annot"><span class="annottext">Connection
+</span><a href="#local-6989586621679097650"><span class="hs-identifier hs-var">conn</span></a></span><span> </span><span class="annot"><span class="annottext">Query
+</span><span class="hs-string">&quot;SELECT * FROM urls&quot;</span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Types.html#Entry"><span class="hs-identifier hs-type">Entry</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-64"></span><span>    </span><span class="annot"><span class="annottext">[URL] -&gt; IO [URL]
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">([URL] -&gt; IO [URL]) -&gt; [URL] -&gt; IO [URL]
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(Entry -&gt; URL) -&gt; [Entry] -&gt; [URL]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679097647"><span class="annot"><span class="annottext">Entry
+</span><a href="#local-6989586621679097647"><span class="hs-identifier hs-var">entry</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Entry -&gt; URL
+</span><a href="Types.html#url_"><span class="hs-identifier hs-var hs-var">url_</span></a></span><span> </span><span class="annot"><span class="annottext">Entry
+</span><a href="#local-6989586621679097647"><span class="hs-identifier hs-var">entry</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[Entry]
+</span><a href="#local-6989586621679097649"><span class="hs-identifier hs-var">results</span></a></span><span>
+</span><span id="line-65"></span><span>
+</span><span id="line-66"></span><span class="hs-comment">-- |Method to retrieve all the URLs on the database.</span><span>
+</span><span id="line-67"></span><span class="annot"><a href="Database.html#getUnprocessedURLs"><span class="hs-identifier hs-type">getUnprocessedURLs</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Connection</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Fetch.html#URL"><span class="hs-identifier hs-type">URL</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-68"></span><span id="getUnprocessedURLs"><span class="annot"><span class="annottext">getUnprocessedURLs :: Connection -&gt; IO [URL]
+</span><a href="Database.html#getUnprocessedURLs"><span class="hs-identifier hs-var hs-var">getUnprocessedURLs</span></a></span></span><span> </span><span id="local-6989586621679097644"><span class="annot"><span class="annottext">Connection
+</span><a href="#local-6989586621679097644"><span class="hs-identifier hs-var">conn</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-69"></span><span>    </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679097642"><span class="annot"><span class="annottext">query :: Query
+</span><a href="#local-6989586621679097642"><span class="hs-identifier hs-var hs-var">query</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>  </span><span class="annot"><span class="annottext">Query
+</span><span class="hs-string">&quot;SELECT * FROM urls WHERE processed = :processed&quot;</span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Query</span></span><span>
+</span><span id="line-70"></span><span>    </span><span id="local-6989586621679097641"><span class="annot"><span class="annottext">[Entry]
+</span><a href="#local-6989586621679097641"><span class="hs-identifier hs-var">results</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Connection -&gt; Query -&gt; [NamedParam] -&gt; IO [Entry]
+forall r.
+FromRow r =&gt;
+Connection -&gt; Query -&gt; [NamedParam] -&gt; IO [r]
+</span><span class="hs-identifier hs-var">queryNamed</span></span><span> </span><span class="annot"><span class="annottext">Connection
+</span><a href="#local-6989586621679097644"><span class="hs-identifier hs-var">conn</span></a></span><span> </span><span class="annot"><span class="annottext">Query
+</span><a href="#local-6989586621679097642"><span class="hs-identifier hs-var">query</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;:processed&quot;</span></span><span> </span><span class="annot"><span class="annottext">Text -&gt; Bool -&gt; NamedParam
+forall v. ToField v =&gt; Text -&gt; v -&gt; NamedParam
+</span><span class="hs-operator hs-var">:=</span></span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">False</span></span><span class="hs-special">]</span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Types.html#Entry"><span class="hs-identifier hs-type">Entry</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-71"></span><span>    </span><span class="annot"><span class="annottext">[URL] -&gt; IO [URL]
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">([URL] -&gt; IO [URL]) -&gt; [URL] -&gt; IO [URL]
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">(Entry -&gt; URL) -&gt; [Entry] -&gt; [URL]
+forall a b. (a -&gt; b) -&gt; [a] -&gt; [b]
+</span><span class="hs-identifier hs-var">map</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679097640"><span class="annot"><span class="annottext">Entry
+</span><a href="#local-6989586621679097640"><span class="hs-identifier hs-var">entry</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Entry -&gt; URL
+</span><a href="Types.html#url_"><span class="hs-identifier hs-var hs-var">url_</span></a></span><span> </span><span class="annot"><span class="annottext">Entry
+</span><a href="#local-6989586621679097640"><span class="hs-identifier hs-var">entry</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[Entry]
+</span><a href="#local-6989586621679097641"><span class="hs-identifier hs-var">results</span></a></span><span>
+</span><span id="line-72"></span><span>
+</span><span id="line-73"></span><span class="hs-comment">-- |Method to retrive all the URLs from the database, parse and extract new links</span><span>
+</span><span id="line-74"></span><span class="hs-comment">-- from these, and store those links on the database. This method could be made more</span><span>
+</span><span id="line-75"></span><span class="hs-comment">-- efficient by remembering which URLs have already been processed, so that next</span><span>
+</span><span id="line-76"></span><span class="hs-comment">-- time unfoldDB is called only newly retrieved urls should be processed.</span><span>
+</span><span id="line-77"></span><span class="annot"><a href="Database.html#unfoldDB"><span class="hs-identifier hs-type">unfoldDB</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Connection</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-78"></span><span id="unfoldDB"><span class="annot"><span class="annottext">unfoldDB :: Connection -&gt; IO ()
+</span><a href="Database.html#unfoldDB"><span class="hs-identifier hs-var hs-var">unfoldDB</span></a></span></span><span> </span><span id="local-6989586621679097638"><span class="annot"><span class="annottext">Connection
+</span><a href="#local-6989586621679097638"><span class="hs-identifier hs-var">conn</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span> </span><span>
+</span><span id="line-79"></span><span>    </span><span class="hs-comment">-- Get unprocessed URLS</span><span>
+</span><span id="line-80"></span><span>    </span><span id="local-6989586621679097637"><span class="annot"><span class="annottext">[URL]
+</span><a href="#local-6989586621679097637"><span class="hs-identifier hs-var">urls</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Connection -&gt; IO [URL]
+</span><a href="Database.html#getUnprocessedURLs"><span class="hs-identifier hs-var">getUnprocessedURLs</span></a></span><span> </span><span class="annot"><span class="annottext">Connection
+</span><a href="#local-6989586621679097638"><span class="hs-identifier hs-var">conn</span></a></span><span>
+</span><span id="line-81"></span><span>    </span><span class="hs-comment">-- Process each of these urls</span><span>
+</span><span id="line-82"></span><span>    </span><span class="annot"><span class="annottext">Connection -&gt; [URL] -&gt; IO ()
+</span><a href="Database.html#process"><span class="hs-identifier hs-var">process</span></a></span><span> </span><span class="annot"><span class="annottext">Connection
+</span><a href="#local-6989586621679097638"><span class="hs-identifier hs-var">conn</span></a></span><span> </span><span class="annot"><span class="annottext">[URL]
+</span><a href="#local-6989586621679097637"><span class="hs-identifier hs-var">urls</span></a></span><span>
+</span><span id="line-83"></span><span>    </span><span class="hs-comment">-- Flag them as 'processed'</span><span>
+</span><span id="line-84"></span><span>    </span><span class="annot"><span class="annottext">(URL -&gt; IO ()) -&gt; [URL] -&gt; IO ()
+forall (t :: * -&gt; *) (m :: * -&gt; *) a b.
+(Foldable t, Monad m) =&gt;
+(a -&gt; m b) -&gt; t a -&gt; m ()
+</span><span class="hs-identifier hs-var">mapM_</span></span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><span id="local-6989586621679097635"><span class="annot"><span class="annottext">URL
+</span><a href="#local-6989586621679097635"><span class="hs-identifier hs-var">url</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Connection -&gt; Query -&gt; [NamedParam] -&gt; IO ()
+</span><span class="hs-identifier hs-var">executeNamed</span></span><span> </span><span class="annot"><span class="annottext">Connection
+</span><a href="#local-6989586621679097638"><span class="hs-identifier hs-var">conn</span></a></span><span> </span><span class="annot"><span class="annottext">Query
+</span><span class="hs-string">&quot;UPDATE urls SET processed = :processed WHERE url = :url&quot;</span></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;:processed&quot;</span></span><span> </span><span class="annot"><span class="annottext">Text -&gt; Bool -&gt; NamedParam
+forall v. ToField v =&gt; Text -&gt; v -&gt; NamedParam
+</span><span class="hs-operator hs-var">:=</span></span><span> </span><span class="annot"><span class="annottext">Bool
+</span><span class="hs-identifier hs-var">True</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;:url&quot;</span></span><span> </span><span class="annot"><span class="annottext">Text -&gt; URL -&gt; NamedParam
+forall v. ToField v =&gt; Text -&gt; v -&gt; NamedParam
+</span><span class="hs-operator hs-var">:=</span></span><span> </span><span class="annot"><span class="annottext">URL
+</span><a href="#local-6989586621679097635"><span class="hs-identifier hs-var">url</span></a></span><span class="hs-special">]</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">[URL]
+</span><a href="#local-6989586621679097637"><span class="hs-identifier hs-var">urls</span></a></span><span>
+</span><span id="line-85"></span><span>
+</span><span id="line-86"></span><span class="hs-comment">-- |Method to donwload a given list of URLs, extract new links and store these on the database.</span><span>
+</span><span id="line-87"></span><span class="annot"><a href="Database.html#process"><span class="hs-identifier hs-type">process</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Connection</span></span><span> </span><span>
+</span><span id="line-88"></span><span>        </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Fetch.html#URL"><span class="hs-identifier hs-type">URL</span></a></span><span class="hs-special">]</span><span>  </span><span class="hs-comment">-- ^ List of URLs to be processed</span><span>
+</span><span id="line-89"></span><span>        </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-90"></span><span id="process"><span class="annot"><span class="annottext">process :: Connection -&gt; [URL] -&gt; IO ()
+</span><a href="Database.html#process"><span class="hs-identifier hs-var hs-var">process</span></a></span></span><span> </span><span class="annot"><span class="annottext">Connection
+</span><span class="hs-identifier">_</span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">() -&gt; IO ()
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span>
+</span><span id="line-91"></span><span class="annot"><a href="Database.html#process"><span class="hs-identifier hs-var">process</span></a></span><span> </span><span id="local-6989586621679097633"><span class="annot"><span class="annottext">Connection
+</span><a href="#local-6989586621679097633"><span class="hs-identifier hs-var">conn</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679097632"><span class="annot"><span class="annottext">URL
+</span><a href="#local-6989586621679097632"><span class="hs-identifier hs-var">x</span></a></span></span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span id="local-6989586621679097631"><span class="annot"><span class="annottext">[URL]
+</span><a href="#local-6989586621679097631"><span class="hs-identifier hs-var">xs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span> </span><span>
+</span><span id="line-92"></span><span>    </span><span class="annot"><span class="annottext">URL -&gt; IO ()
+forall a. Show a =&gt; a -&gt; IO ()
+</span><span class="hs-identifier hs-var">print</span></span><span> </span><span class="annot"><span class="annottext">(URL -&gt; IO ()) -&gt; URL -&gt; IO ()
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">URL
+</span><span class="hs-string">&quot;Processing : &quot;</span></span><span> </span><span class="annot"><span class="annottext">URL -&gt; URL -&gt; URL
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">URL
+</span><a href="#local-6989586621679097632"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><span id="line-93"></span><span>    </span><span id="local-6989586621679097630"><span class="annot"><span class="annottext">URL
+</span><a href="#local-6989586621679097630"><span class="hs-identifier hs-var">urlContent</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">URL -&gt; IO URL
+</span><a href="Fetch.html#downloadURL"><span class="hs-identifier hs-var">downloadURL</span></a></span><span> </span><span class="annot"><span class="annottext">URL
+</span><a href="#local-6989586621679097632"><span class="hs-identifier hs-var">x</span></a></span><span>
+</span><span id="line-94"></span><span>    </span><span class="annot"><span class="annottext">Connection -&gt; [URL] -&gt; IO ()
+</span><a href="Database.html#storeURLs"><span class="hs-identifier hs-var">storeURLs</span></a></span><span> </span><span class="annot"><span class="annottext">Connection
+</span><a href="#local-6989586621679097633"><span class="hs-identifier hs-var">conn</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">URL -&gt; [URL]
+</span><a href="Fetch.html#getHTMLpages"><span class="hs-identifier hs-var">getHTMLpages</span></a></span><span> </span><span class="annot"><span class="annottext">URL
+</span><a href="#local-6989586621679097630"><span class="hs-identifier hs-var">urlContent</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-95"></span><span>    </span><span class="annot"><span class="annottext">Connection -&gt; [URL] -&gt; IO ()
+</span><a href="Database.html#process"><span class="hs-identifier hs-var">process</span></a></span><span> </span><span class="annot"><span class="annottext">Connection
+</span><a href="#local-6989586621679097633"><span class="hs-identifier hs-var">conn</span></a></span><span> </span><span class="annot"><span class="annottext">[URL]
+</span><a href="#local-6989586621679097631"><span class="hs-identifier hs-var">xs</span></a></span><span>
+</span><span id="line-96"></span></pre></body></html>

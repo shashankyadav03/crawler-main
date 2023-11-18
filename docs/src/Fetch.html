@@ -1,0 +1,125 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-comment">-- |Module that performs http requests as well as parsing returned html.</span><span>
+</span><span id="line-2"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Fetch</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-3"></span><span>
+</span><span id="line-4"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Maybe</span></span><span>
+</span><span id="line-5"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Either</span></span><span>
+</span><span id="line-6"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Word</span></span><span>
+</span><span id="line-7"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ByteString.Lazy</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">L</span></span><span>
+</span><span id="line-8"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Control.Exception</span></span><span>
+</span><span id="line-9"></span><span>
+</span><span id="line-10"></span><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="annot"><span class="hs-identifier">Data.ByteString.Lazy.Char8</span></span><span> </span><span class="hs-keyword">as</span><span> </span><span class="annot"><span class="hs-identifier">L8</span></span><span>
+</span><span id="line-11"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Network.HTTP.Simple</span></span><span>
+</span><span id="line-12"></span><span>
+</span><span id="line-13"></span><span class="hs-keyword">type</span><span> </span><span id="URL"><span class="annot"><a href="Fetch.html#URL"><span class="hs-identifier hs-var">URL</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span>
+</span><span id="line-14"></span><span class="hs-keyword">type</span><span> </span><span id="HTML"><span class="annot"><a href="Fetch.html#HTML"><span class="hs-identifier hs-var">HTML</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span>
+</span><span id="line-15"></span><span>
+</span><span id="line-16"></span><span class="annot"><a href="Fetch.html#downloadURL"><span class="hs-identifier hs-type">downloadURL</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Fetch.html#URL"><span class="hs-identifier hs-type">URL</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">IO</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">String</span></span><span>
+</span><span id="line-17"></span><span id="downloadURL"><span class="annot"><span class="annottext">downloadURL :: String -&gt; IO String
+</span><a href="Fetch.html#downloadURL"><span class="hs-identifier hs-var hs-var">downloadURL</span></a></span></span><span> </span><span id="local-6989586621679097518"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679097518"><span class="hs-identifier hs-var">url</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-18"></span><span>    </span><span id="local-6989586621679097517"><span class="annot"><span class="annottext">Request
+</span><a href="#local-6989586621679097517"><span class="hs-identifier hs-var">request</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">String -&gt; IO Request
+forall (m :: * -&gt; *). MonadThrow m =&gt; String -&gt; m Request
+</span><span class="hs-identifier hs-var">parseRequest</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679097518"><span class="hs-identifier hs-var">url</span></a></span><span>
+</span><span id="line-19"></span><span>    </span><span id="local-6989586621679097515"><span class="annot"><span class="annottext">Response ByteString
+</span><a href="#local-6989586621679097515"><span class="hs-identifier hs-var">response</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Request -&gt; IO (Response ByteString)
+forall (m :: * -&gt; *).
+MonadIO m =&gt;
+Request -&gt; m (Response ByteString)
+</span><span class="hs-identifier hs-var">httpLBS</span></span><span> </span><span class="annot"><span class="annottext">Request
+</span><a href="#local-6989586621679097517"><span class="hs-identifier hs-var">request</span></a></span><span>
+</span><span id="line-20"></span><span>    </span><span class="annot"><span class="annottext">String -&gt; IO String
+forall (m :: * -&gt; *) a. Monad m =&gt; a -&gt; m a
+</span><span class="hs-identifier hs-var">return</span></span><span> </span><span class="annot"><span class="annottext">(String -&gt; IO String) -&gt; String -&gt; IO String
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">ByteString -&gt; String
+</span><span class="hs-identifier hs-var">L8.unpack</span></span><span> </span><span class="annot"><span class="annottext">(ByteString -&gt; String) -&gt; ByteString -&gt; String
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><span class="hs-operator hs-var">$</span></span><span> </span><span class="annot"><span class="annottext">Response ByteString -&gt; ByteString
+forall a. Response a -&gt; a
+</span><span class="hs-identifier hs-var">getResponseBody</span></span><span> </span><span class="annot"><span class="annottext">Response ByteString
+</span><a href="#local-6989586621679097515"><span class="hs-identifier hs-var">response</span></a></span><span>
+</span><span id="line-21"></span><span>
+</span><span id="line-22"></span><span class="hs-comment">-- |Basic method for extracting all urls of a given text (String)</span><span>
+</span><span id="line-23"></span><span class="annot"><a href="Fetch.html#parseURLs"><span class="hs-identifier hs-type">parseURLs</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Fetch.html#HTML"><span class="hs-identifier hs-type">HTML</span></a></span><span>              </span><span class="hs-comment">-- ^ String representation of html file</span><span>
+</span><span id="line-24"></span><span>          </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Fetch.html#URL"><span class="hs-identifier hs-type">URL</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-25"></span><span id="parseURLs"><span class="annot"><span class="annottext">parseURLs :: String -&gt; [String]
+</span><a href="Fetch.html#parseURLs"><span class="hs-identifier hs-var hs-var">parseURLs</span></a></span></span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
+</span><span id="line-26"></span><span class="annot"><a href="Fetch.html#parseURLs"><span class="hs-identifier hs-var">parseURLs</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">'h'</span></span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">'t'</span></span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">'t'</span></span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">'p'</span></span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">':'</span></span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">'/'</span></span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">'/'</span></span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span id="local-6989586621679097510"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679097510"><span class="hs-identifier hs-var">xs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;http://&quot;</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; String -&gt; String
+forall a. [a] -&gt; [a] -&gt; [a]
+</span><span class="hs-operator hs-var">++</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679097509"><span class="hs-identifier hs-var">url</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">String -&gt; [String] -&gt; [String]
+forall a. a -&gt; [a] -&gt; [a]
+</span><span class="hs-glyph hs-var">:</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; [String]
+</span><a href="Fetch.html#parseURLs"><span class="hs-identifier hs-var">parseURLs</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679097508"><span class="hs-identifier hs-var">rest</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-27"></span><span>   </span><span class="hs-keyword">where</span><span> </span><span>
+</span><span id="line-28"></span><span>      </span><span class="hs-special">(</span><span id="local-6989586621679097509"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679097509"><span class="hs-identifier hs-var">url</span></a></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679097508"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679097508"><span class="hs-identifier hs-var">rest</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Char -&gt; Bool) -&gt; String -&gt; (String, String)
+forall a. (a -&gt; Bool) -&gt; [a] -&gt; ([a], [a])
+</span><span class="hs-identifier hs-var">break</span></span><span> </span><span class="annot"><span class="annottext">Char -&gt; Bool
+</span><a href="#local-6989586621679097506"><span class="hs-identifier hs-var">space</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679097510"><span class="hs-identifier hs-var">xs</span></a></span><span>
+</span><span id="line-29"></span><span>      </span><span id="local-6989586621679097506"><span class="annot"><span class="annottext">space :: Char -&gt; Bool
+</span><a href="#local-6989586621679097506"><span class="hs-identifier hs-var hs-var">space</span></a></span></span><span> </span><span id="local-6989586621679097502"><span class="annot"><span class="annottext">Char
+</span><a href="#local-6989586621679097502"><span class="hs-identifier hs-var">c</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Char -&gt; String -&gt; Bool
+forall (t :: * -&gt; *) a. (Foldable t, Eq a) =&gt; a -&gt; t a -&gt; Bool
+</span><span class="hs-identifier hs-var">elem</span></span><span> </span><span class="annot"><span class="annottext">Char
+</span><a href="#local-6989586621679097502"><span class="hs-identifier hs-var">c</span></a></span><span> </span><span class="hs-special">[</span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">' '</span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">'\t'</span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">'\n'</span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">'\r'</span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">'\&quot;'</span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">'\''</span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">')'</span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">';'</span></span><span class="hs-special">,</span><span class="annot"><span class="annottext">Char
+</span><span class="hs-char">'&lt;'</span></span><span class="hs-special">]</span><span>
+</span><span id="line-30"></span><span class="annot"><a href="Fetch.html#parseURLs"><span class="hs-identifier hs-var">parseURLs</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Char
+</span><span class="hs-identifier">_</span></span><span class="annot"><span class="hs-glyph hs-type">:</span></span><span id="local-6989586621679097500"><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679097500"><span class="hs-identifier hs-var">xs</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String -&gt; [String]
+</span><a href="Fetch.html#parseURLs"><span class="hs-identifier hs-var">parseURLs</span></a></span><span> </span><span class="annot"><span class="annottext">String
+</span><a href="#local-6989586621679097500"><span class="hs-identifier hs-var">xs</span></a></span><span>
+</span><span id="line-31"></span><span>
+</span><span id="line-32"></span><span class="annot"><a href="Fetch.html#isHTML"><span class="hs-identifier hs-type">isHTML</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Fetch.html#URL"><span class="hs-identifier hs-type">URL</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Bool</span></span><span>
+</span><span id="line-33"></span><span id="isHTML"><span class="annot"><span class="annottext">isHTML :: String -&gt; Bool
+</span><a href="Fetch.html#isHTML"><span class="hs-identifier hs-var hs-var">isHTML</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">String -&gt; String -&gt; Bool
+forall a. Eq a =&gt; a -&gt; a -&gt; Bool
+</span><span class="hs-operator hs-var">==</span></span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;.html&quot;</span></span><span class="hs-special">)</span><span class="annot"><span class="annottext">(String -&gt; Bool) -&gt; (String -&gt; String) -&gt; String -&gt; Bool
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; String
+forall a. [a] -&gt; [a]
+</span><span class="hs-identifier hs-var">reverse</span></span><span> </span><span class="annot"><span class="annottext">(String -&gt; String) -&gt; (String -&gt; String) -&gt; String -&gt; String
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Int -&gt; String -&gt; String
+forall a. Int -&gt; [a] -&gt; [a]
+</span><span class="hs-identifier hs-var">take</span></span><span> </span><span class="annot"><span class="annottext">Int
+</span><span class="hs-number">5</span></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(String -&gt; String) -&gt; (String -&gt; String) -&gt; String -&gt; String
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; String
+forall a. [a] -&gt; [a]
+</span><span class="hs-identifier hs-var">reverse</span></span><span> </span><span>
+</span><span id="line-34"></span><span>
+</span><span id="line-35"></span><span class="annot"><a href="Fetch.html#getHTMLpages"><span class="hs-identifier hs-type">getHTMLpages</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Fetch.html#HTML"><span class="hs-identifier hs-type">HTML</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Fetch.html#URL"><span class="hs-identifier hs-type">URL</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-36"></span><span id="getHTMLpages"><span class="annot"><span class="annottext">getHTMLpages :: String -&gt; [String]
+</span><a href="Fetch.html#getHTMLpages"><span class="hs-identifier hs-var hs-var">getHTMLpages</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(String -&gt; Bool) -&gt; [String] -&gt; [String]
+forall a. (a -&gt; Bool) -&gt; [a] -&gt; [a]
+</span><span class="hs-identifier hs-var">filter</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; Bool
+</span><a href="Fetch.html#isHTML"><span class="hs-identifier hs-var">isHTML</span></a></span><span> </span><span class="annot"><span class="annottext">([String] -&gt; [String])
+-&gt; (String -&gt; [String]) -&gt; String -&gt; [String]
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><span class="hs-operator hs-var">.</span></span><span> </span><span class="annot"><span class="annottext">String -&gt; [String]
+</span><a href="Fetch.html#parseURLs"><span class="hs-identifier hs-var">parseURLs</span></a></span><span>
+</span><span id="line-37"></span></pre></body></html>
