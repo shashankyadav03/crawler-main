@@ -19,16 +19,18 @@ Crawler Main is an advanced web crawling and scraping tool designed to efficient
    git clone https://github.com/shashankyadav03/crawler-main.git
 2. Navigate to the project directory:
    cd crawler-main
+3. Download haskell stack
+   brew install haskell-stack
 
 ## Usage
 
 To start using the crawler, navigate to the source directory and run:
 
-haskell build
+stack build
 
 After building
 
-haskell stack run show [any website] #eg: [https://www.eecs.qmul.ac.uk]
+stack run show {any website} #eg: {https://www.eecs.qmul.ac.uk}
 
 
 ## Contributing
